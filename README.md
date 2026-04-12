@@ -216,7 +216,7 @@ ArgusML/
 - [ ] Web dashboard with live threat visualization
 - [ ] REST API for enterprise integration
 - [ ] Docker container for easy deployment
-- [ ] Systemd services for autonomous operation
+- [x] Systemd services for autonomous operation
 - [ ] Continuous learning — retrain on rolling window
 - [ ] Post-quantum encrypted threat intelligence sharing
 - [ ] Cloud deployment (AWS/GCP)
