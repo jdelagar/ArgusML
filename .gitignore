@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+
+# Models (too large for GitHub)
+*.joblib
+*.pkl
+
+# Datasets (too large for GitHub)
+datasets/
+*.csv
+
+# Outputs
+output/fusion_decisions.jsonl
+*.pcap
+*.pcap.*
+
+# Credentials
+*.key
+*.pem
+*.secret
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
