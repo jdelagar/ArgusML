@@ -1,0 +1,17 @@
+[Unit]
+Description=ArgusML Autonomous ML-driven IDPS
+After=network.target suricata.service ollama.service
+Requires=suricata.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/cerberus-s6/argusml
+ExecStart=/home/cerberus-s6/suricata-env/bin/python3 argus_ml.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
