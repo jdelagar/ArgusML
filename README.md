@@ -217,7 +217,7 @@ ArgusML/
 - [x] REST API for enterprise integration
 - [x] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
-- [ ] Continuous learning — retrain on rolling window
+- [x] Continuous learning — self-improving models, automatic retraining
 - [ ] Post-quantum encrypted threat intelligence sharing
 - [ ] Cloud deployment (AWS/GCP)
 - [ ] Windows support
