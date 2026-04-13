@@ -35,6 +35,7 @@ from streams.netflow import NetFlowStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
 from core.continuous_learning import ContinuousLearningEngine
+from core.pqc import ArgusMLPQCProvider, ArgusMLThreatIntelShipper
 
 
 class ArgusML:
@@ -49,6 +50,7 @@ class ArgusML:
         self.fusion = BayesianFusion()
         self.rule_generator = RuleGenerator()
         self.continuous_learning = None
+        self.pqc_shipper = None
         self.running = False
         self.total_detections = 0
         self.start_time = None
@@ -118,6 +120,17 @@ class ArgusML:
         # Initialize continuous learning
         self.continuous_learning = ContinuousLearningEngine(self.streams, self.fusion)
 
+        # Initialize PQC threat intel shipper
+        try:
+            pqc = ArgusMLPQCProvider()
+            self.pqc_shipper = ArgusMLThreatIntelShipper(
+                worker_url="https://suricata-ingest.jdelagar.workers.dev/argusml",
+                pqc_provider=pqc
+            )
+            print("[argus_ml] PQC threat intel shipper initialized")
+        except Exception as e:
+            print(f"[argus_ml] PQC shipper not available: {e}")
+
     def _train_stream(self, stream):
         """Train a stream on available data."""
         csv_path = os.path.join(DATASETS_DIR, f"{stream.get_stream_name()}.csv")
@@ -175,6 +188,10 @@ class ArgusML:
             # Feed to continuous learning
             if self.continuous_learning:
                 self.continuous_learning.process_decision(decision)
+
+            # Ship encrypted threat intel
+            if self.pqc_shipper and fused_label != "normal":
+                self.pqc_shipper.ship_detection(decision)
 
             # Log to output file
             self._log_decision(decision)
