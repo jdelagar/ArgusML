@@ -31,6 +31,7 @@ from core.config import (
 from streams.suricata import SuricataStream
 from streams.dns import DNSStream
 from streams.tls import TLSStream
+from streams.netflow import NetFlowStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
 from core.continuous_learning import ContinuousLearningEngine
@@ -101,6 +102,18 @@ class ArgusML:
         self.streams["tls"] = tls
         self.fusion.weights["tls"] = max(0.5, tls.accuracy * 2)
         print(f"[argus_ml] TLS stream ready — accuracy: {tls.accuracy:.4f}")
+
+        # NetFlow stream
+        netflow = NetFlowStream()
+        if self.args.train:
+            self._train_stream(netflow)
+        else:
+            if not netflow.load_model():
+                print("[argus_ml] No NetFlow model found — training now...")
+                self._train_stream(netflow)
+        self.streams["netflow"] = netflow
+        self.fusion.weights["netflow"] = max(0.5, netflow.accuracy * 2)
+        print(f"[argus_ml] NetFlow stream ready — accuracy: {netflow.accuracy:.4f}")
 
         # Initialize continuous learning
         self.continuous_learning = ContinuousLearningEngine(self.streams, self.fusion)
