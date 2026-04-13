@@ -215,7 +215,7 @@ ArgusML/
 - [ ] Network flow analysis stream
 - [x] Web dashboard with live threat visualization and world map attack origins
 - [x] REST API for enterprise integration
-- [ ] Docker container for easy deployment
+- [x] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
 - [ ] Continuous learning — retrain on rolling window
 - [ ] Post-quantum encrypted threat intelligence sharing
