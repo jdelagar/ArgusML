@@ -8,7 +8,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-green.svg)](https://python.org)
 [![GPU](https://img.shields.io/badge/GPU-CUDA%2013.0-brightgreen.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![Accuracy](https://img.shields.io/badge/Accuracy-98.04%25-success.svg)]()
-[![Streams](https://img.shields.io/badge/Streams-3%20Active-orange.svg)]()
+[![Streams](https://img.shields.io/badge/Streams-4%20Active-orange.svg)]()
 
 ArgusML is a fully autonomous Intrusion Detection & Prevention System (IDPS) powered by an ensemble of independently trained machine learning models. It monitors live network traffic across three detection streams simultaneously, fuses their decisions using adaptive Bayesian weighting, detects known and zero-day threats, autonomously generates and deploys Suricata rules, and continuously retrains itself as new threats are discovered — all without human intervention.
 
@@ -262,7 +262,7 @@ ArgusML/
 - [x] REST API for enterprise integration
 - [x] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
-- [ ] NetFlow stream — connection pattern and beaconing detection
+- [x] NetFlow stream — beaconing, port scan, lateral movement, data exfiltration
 - [ ] Post-quantum encrypted threat intelligence sharing
 - [ ] Cloud deployment (AWS/GCP)
 - [ ] Windows support
