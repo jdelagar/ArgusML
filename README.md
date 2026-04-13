@@ -8,21 +8,24 @@
 [![Python](https://img.shields.io/badge/Python-3.12-green.svg)](https://python.org)
 [![GPU](https://img.shields.io/badge/GPU-CUDA%2013.0-brightgreen.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![Accuracy](https://img.shields.io/badge/Accuracy-98.04%25-success.svg)]()
+[![Streams](https://img.shields.io/badge/Streams-3%20Active-orange.svg)]()
 
-ArgusML is a fully autonomous Intrusion Detection & Prevention System (IDPS) powered by an ensemble of machine learning models. It monitors live network traffic, fuses decisions from multiple ML models using adaptive Bayesian weighting, detects known and zero-day threats, and autonomously generates and deploys Suricata detection rules — all without human intervention.
+ArgusML is a fully autonomous Intrusion Detection & Prevention System (IDPS) powered by an ensemble of independently trained machine learning models. It monitors live network traffic across three detection streams simultaneously, fuses their decisions using adaptive Bayesian weighting, detects known and zero-day threats, autonomously generates and deploys Suricata rules, and continuously retrains itself as new threats are discovered — all without human intervention.
 
-**No human writes the rules. No human analyzes the alerts. ArgusML does it all.**
+**No human writes the rules. No human analyzes the alerts. No human retrains the models. ArgusML does it all.**
 
 ---
 
 ## What ArgusML Is
 
-ArgusML is not a single ML model. It is an **autonomous pipeline** that combines multiple independently trained ML models whose outputs are fused together into a single high-confidence threat decision:
+ArgusML is not a single ML model. It is a **self-improving autonomous pipeline** that combines multiple independently trained ML models across three detection streams:
 
-- **XGBoost classifier** — trained from scratch on live Suricata network logs, detects known threat categories at 98.04% accuracy
-- **Isolation Forest** — trained from scratch on normal traffic baselines, detects zero-day and unknown anomalies that signature based systems miss
-- **Adaptive Bayesian Fusion Engine** — original architecture that combines model outputs with adaptive weighting, getting smarter over time
-- **Local LLM Rule Generator** — uses Meta Llama 3 running on local GPU to autonomously write and deploy Suricata detection rules
+- **Suricata Stream** — XGBoost (GPU) + Isolation Forest trained on network flow features. Detects backdoors, DDoS, botnets, web attacks at 98.04% accuracy.
+- **DNS Stream** — XGBoost + Isolation Forest trained on DNS query features. Detects DNS tunneling, DGA domains, fast flux, C2 beaconing at 100% accuracy.
+- **TLS Stream** — XGBoost + Isolation Forest trained on TLS fingerprint features. Detects malicious JA3 hashes, self-signed C2 certs, weak cipher suites at 100% accuracy.
+- **Adaptive Bayesian Fusion Engine** — original architecture that combines all stream outputs with adaptive weighting, getting smarter over time.
+- **Continuous Learning Engine** — automatically retrains models as new threats are detected. ArgusML gets smarter the longer it runs.
+- **Local LLM Rule Generator** — uses Meta Llama 3 on local GPU to autonomously write and deploy Suricata detection rules.
 
 ---
 
@@ -32,11 +35,18 @@ ArgusML is not a single ML model. It is an **autonomous pipeline** that combines
 |---------|---------|-----------------|-------------------------------|
 | Autonomous rule generation | ✅ | ❌ | ❌ |
 | Adaptive Bayesian fusion | ✅ | ❌ | ❌ |
+| Continuous self-improvement | ✅ | ❌ | ✅ |
+| 3 simultaneous detection streams | ✅ | ❌ | ✅ |
 | Isolation Forest zero-day detection | ✅ | ❌ | ✅ |
+| JA3/JA4 TLS fingerprinting | ✅ | ❌ | ✅ |
+| DNS tunneling detection | ✅ | ❌ | ✅ |
 | Local LLM (no cloud required) | ✅ | ❌ | ❌ |
 | GPU accelerated training | ✅ | ❌ | ✅ |
 | Explainable AI | ✅ | ❌ | ❌ |
 | Models trained from scratch | ✅ | ❌ | ❌ |
+| REST API | ✅ | ❌ | ✅ |
+| Web dashboard with world map | ✅ | ❌ | ✅ |
+| Docker container | ✅ | ❌ | ✅ |
 | Open source | ✅ | ✅ | ❌ |
 | Cost | Free | Free | $100K+/yr |
 
@@ -49,57 +59,71 @@ Live Network Traffic
 |
 Suricata 8.0+ (eve.json)
 |
-┌─────────────────────────┐
-│     SuricataStream      │
-│  XGBoost (GPU/CUDA)     │  ← Detects known threats
-│  Isolation Forest       │  ← Detects zero-day anomalies
-└─────────────────────────┘
+┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
+│   Suricata Stream   │  │     DNS Stream      │  │     TLS Stream      │
+│ XGBoost (GPU/CUDA)  │  │ XGBoost (GPU/CUDA)  │  │ XGBoost (GPU/CUDA)  │
+│  Isolation Forest   │  │  Isolation Forest   │  │  Isolation Forest   │
+│  98.04% accuracy    │  │  100% accuracy      │  │  100% accuracy      │
+└─────────────────────┘  └─────────────────────┘  └─────────────────────┘
+|                         |                         |
+┌─────────────────────────────────────────────────────────────────────┐
+│              Adaptive Bayesian Fusion Engine                        │
+│   Weights adapt based on stream accuracy — gets smarter over time   │
+│   Stream weights: suricata=1.96, dns=2.0, tls=2.0                  │
+└─────────────────────────────────────────────────────────────────────┘
 |
-┌─────────────────────────┐
-│  Adaptive Bayesian      │
-│  Fusion Engine          │  ← Combines model outputs
-│  (adaptive weighting)   │  ← Gets smarter over time
-└─────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│              Continuous Learning Engine                             │
+│   New detections → expand dataset → retrain → deploy if improved   │
+└─────────────────────────────────────────────────────────────────────┘
 |
-┌─────────────────────────┐
-│  ArgusML Rule Generator │
-│  Ollama llama3 (local)  │  ← Writes rule description
-│  Suricata rule builder  │  ← Builds valid rule syntax
-└─────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│              ArgusML Rule Generator                                 │
+│   Ollama llama3 (local GPU) → plain English description             │
+│   → valid Suricata rule syntax → auto-deploy → Suricata reload      │
+└─────────────────────────────────────────────────────────────────────┘
 |
-argus_ml.rules → Suricata auto-reload
+argus_ml.rules → Suricata fires [ARGUS-ML] alerts
 |
-[ARGUS-ML] alerts in EveBox
+Live Web Dashboard (port 5000) + REST API (port 5001)
 ```
 
 ---
 
 ## Performance
 
-All models are trained from scratch on live data — no pre-trained weights, no borrowed models.
+All models trained from scratch on live data — no pre-trained weights, no borrowed models.
 
-| Model | Training Data | Samples | Accuracy | F1 Score | Hardware |
-|-------|--------------|---------|----------|----------|----------|
-| XGBoost | Live Suricata logs | 9,193 | 98.04% | 97.66% | NVIDIA RTX 5070 Ti |
-| Isolation Forest | Normal traffic baseline | 6,373 | Anomaly detection | — | NVIDIA RTX 5070 Ti |
+| Stream | Model | Training Samples | Accuracy | F1 Score | Hardware |
+|--------|-------|-----------------|----------|----------|----------|
+| Suricata | XGBoost + IF | 9,193 | 98.04% | 97.66% | RTX 5070 Ti |
+| DNS | XGBoost + IF | 592 | 100% | 100% | RTX 5070 Ti |
+| TLS | XGBoost + IF | 7,636 | 100% | 100% | RTX 5070 Ti |
 
 ---
 
 ## Key Features
 
-### 1. Adaptive Bayesian Fusion Engine
-ArgusML's original fusion architecture combines outputs from multiple ML models using Bayesian probability weighting. Unlike simple voting or stacking classifiers, the weights adapt automatically based on each model's historical accuracy. A model that starts making mistakes gets less weight. A model that becomes more accurate gets more weight. The system improves over time without retraining.
+### 1. Three Simultaneous Detection Streams
+ArgusML runs three independent ML pipelines in parallel, each watching a different aspect of network traffic. A threat that evades one stream may be caught by another. All three feed into the Bayesian fusion engine for a final high-confidence decision.
 
-### 2. Dual-Model Threat Detection
-Every piece of network traffic is evaluated by two independently trained models:
-- **XGBoost** identifies the specific threat category (backdoor, DDoS, botnet, web attack) with confidence scores
-- **Isolation Forest** scores how unusual the traffic is compared to the normal baseline — catching threats XGBoost has never seen before
+### 2. Adaptive Bayesian Fusion Engine
+Combines outputs from all three streams using Bayesian probability weighting. Weights adapt automatically — streams with higher historical accuracy get more influence. The system improves its decision making over time without retraining.
 
-### 3. Autonomous Rule Generation with Local LLM
-When a threat is confirmed by the fusion engine, ArgusML automatically calls Meta Llama 3 running locally on GPU. The LLM generates a plain English description of the threat. ArgusML wraps it in valid Suricata rule syntax and deploys it instantly. No internet. No API calls. No data leaving the machine. Perfect for classified and air-gapped environments.
+### 3. Continuous Learning Engine
+Every high-confidence detection (>85%) is automatically added to the training dataset. Every hour, ArgusML checks if enough new data has accumulated and retrains the affected models. New models are only deployed if accuracy meets the minimum threshold. ArgusML literally gets smarter the longer it runs.
 
-### 4. Explainable AI
-Every detection includes a human readable explanation of exactly why it was flagged:
+### 4. JA3/JA4 TLS Fingerprinting
+The TLS stream extracts JA3, JA3S, and JA4 fingerprints from every TLS connection. Known malicious JA3 hashes (Cobalt Strike, Metasploit, TrickBot, Emotet) trigger immediate alerts. Unusual cipher suites, self-signed certificates on non-standard ports, and weak TLS versions are flagged automatically.
+
+### 5. DNS Anomaly Detection
+The DNS stream calculates Shannon entropy, consonant ratios, digit ratios, and query patterns for every DNS request. High entropy domain names signal DGA malware. Long TXT queries signal DNS tunneling. Fast flux is detected by monitoring TTL values and response counts.
+
+### 6. Local LLM Rule Generation
+When a threat is confirmed, ArgusML calls Meta Llama 3 running locally on GPU. The LLM generates a plain English description. ArgusML wraps it in valid Suricata rule syntax and deploys it instantly. No internet. No API calls. No data leaving the machine. Perfect for air-gapped and classified environments.
+
+### 7. Explainable AI
+Every detection includes a human readable explanation:
 ```
 [DETECTION #1] 03:53:08
 Threat:      backdoor_activity
@@ -109,15 +133,24 @@ Explanation: Threat detected: backdoor_activity (confidence: 95.5%) |
 High byte rate (1.2M B/s) suggests data exfiltration
 ```
 
-### 5. GPU Accelerated Training via CUDA DMatrix
-ArgusML uses XGBoost's native CUDA DMatrix format to keep training data on the GPU throughout the entire training process. This eliminates the CPU-GPU memory transfer bottleneck and achieves full GPU utilization. Training 9,000+ samples completes in seconds.
+### 8. Live Web Dashboard
+Real-time threat visualization at http://localhost:5000 featuring:
+- World map with animated attack origin lines
+- Live threat feed with confidence scores
+- Threat distribution charts
+- System health monitoring
+- Generated rules display
 
-### 6. Multi-Stream Architecture
-ArgusML is designed to support multiple independent detection streams. Each stream trains its own models on its own data and contributes to the Bayesian fusion decision:
-- ✅ **Suricata Stream** — Live network traffic analysis (implemented)
-- 🔄 **DNS Stream** — DNS tunneling and DGA domain detection (roadmap)
-- 🔄 **TLS Stream** — Certificate anomalies and cipher suite inspection (roadmap)
-- 🔄 **NetFlow Stream** — Connection pattern and beaconing detection (roadmap)
+### 9. REST API
+Enterprise integration at http://localhost:5001:
+```
+GET  /api/v1/status       — System health and model stats
+GET  /api/v1/detections   — Recent threat detections
+GET  /api/v1/rules        — Generated Suricata rules
+GET  /api/v1/threats      — Threat distribution
+GET  /api/v1/streams      — ML stream performance
+POST /api/v1/predict      — Submit traffic for analysis
+```
 
 ---
 
@@ -132,39 +165,45 @@ ArgusML is designed to support multiple independent detection streams. Each stre
 - Ollama with llama3
 - Training data (Suricata eve.json logs)
 
-### Setup
+### Quick Start
 ```bash
 git clone https://github.com/jdelagar/ArgusML.git
 cd ArgusML
 python3 -m venv venv
 source venv/bin/activate
-pip install xgboost scikit-learn pandas numpy joblib requests pyyaml
+pip install -r requirements.txt
 ollama pull llama3
 ```
 
+### Docker
+```bash
+docker build -t argusml .
+docker run -d --gpus all -p 5000:5000 -p 5001:5001 argusml
+```
+
 ### Configure Suricata
-Add to `/etc/suricata/suricata.yaml`:
+Add to /etc/suricata/suricata.yaml:
 ```yaml
 rule-files:
   - suricata.rules
   - argus_ml.rules
 ```
 
-### Prepare Training Data
-Place your Suricata feature dataset at:
-```
-datasets/suricata.csv
-```
-The CSV must contain 30 network flow features plus a `Label` column with threat categories.
-
-### Train Models from Scratch
+### Train All Models
 ```bash
 python3 argus_ml.py --train
 ```
 
-### Run Live Detection
+### Run
 ```bash
 sudo python3 argus_ml.py
+```
+
+### Auto-start on Boot
+```bash
+sudo cp argus-ml.service /etc/systemd/system/
+sudo systemctl enable argus-ml.service
+sudo systemctl start argus-ml.service
 ```
 
 ---
@@ -181,43 +220,49 @@ cf_label backdoor_activity, cf_severity 1, cf_version 1.0;
 classtype:misc-attack; sid:9500001; rev:1;)
 ```
 
-**Rule metadata fields:**
-- `cf_confidence` — fusion engine confidence score (0.0 to 1.0)
-- `cf_streams` — which detection streams contributed to this rule
-- `cf_label` — threat taxonomy label
-- `cf_severity` — severity level (1=critical, 2=high, 3=medium, 4=low)
-- `cf_version` — ArgusML version that generated the rule
-
 ---
 
 ## Project Structure
 
 ```
 ArgusML/
-├── argus_ml.py              # Main entry point and orchestration
+├── argus_ml.py                    # Main entry point and orchestration
 ├── core/
-│   ├── config.py            # System configuration and constants
-│   └── base.py              # Base stream class with XGBoost + Isolation Forest
+│   ├── config.py                  # System configuration
+│   ├── base.py                    # Base stream class (XGBoost + Isolation Forest)
+│   └── continuous_learning.py     # Self-improving model retraining engine
 ├── streams/
-│   └── suricata.py          # Suricata live detection stream
+│   ├── suricata.py                # Network traffic detection stream
+│   ├── dns.py                     # DNS anomaly detection stream
+│   └── tls.py                     # TLS/SSL inspection stream
 ├── fusion/
-│   └── bayesian.py          # Original Adaptive Bayesian Fusion Engine
-└── output/
-└── rule_generator.py    # LLM-powered autonomous rule generator
+│   └── bayesian.py                # Adaptive Bayesian Fusion Engine
+├── output/
+│   └── rule_generator.py          # LLM-powered autonomous rule generator
+├── dashboard/
+│   ├── app.py                     # Web dashboard (Flask + Socket.IO)
+│   └── api.py                     # REST API
+├── Dockerfile                     # Container deployment
+├── requirements.txt               # Python dependencies
+└── argus-ml.service               # Systemd service
 ```
 
 ---
 
 ## Roadmap
 
-- [x] DNS anomaly detection stream — tunneling, DGA, fast flux detection
+- [x] Suricata network traffic detection stream
+- [x] DNS anomaly detection stream — tunneling, DGA, fast flux
 - [x] TLS/SSL inspection stream — JA3/JA4 fingerprinting, C2 detection
-- [ ] Network flow analysis stream
-- [x] Web dashboard with live threat visualization and world map attack origins
+- [x] Adaptive Bayesian Fusion Engine
+- [x] Continuous learning — self-improving models, automatic retraining
+- [x] Local LLM autonomous rule generation
+- [x] Explainable AI detections
+- [x] Live web dashboard with world map attack visualization
 - [x] REST API for enterprise integration
 - [x] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
-- [x] Continuous learning — self-improving models, automatic retraining
+- [ ] NetFlow stream — connection pattern and beaconing detection
 - [ ] Post-quantum encrypted threat intelligence sharing
 - [ ] Cloud deployment (AWS/GCP)
 - [ ] Windows support
@@ -228,7 +273,7 @@ ArgusML/
 
 Copyright 2026 Juan Manuel De La Garza
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for full details.
+Licensed under the Apache License, Version 2.0. See LICENSE for full details.
 
 You are free to use, modify and distribute this software. Commercial use is permitted. You must include attribution and cannot use my name to endorse derived products without permission.
 
