@@ -214,7 +214,7 @@ ArgusML/
 - [ ] TLS/SSL inspection stream
 - [ ] Network flow analysis stream
 - [x] Web dashboard with live threat visualization and world map attack origins
-- [ ] REST API for enterprise integration
+- [x] REST API for enterprise integration
 - [ ] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
 - [ ] Continuous learning — retrain on rolling window
