@@ -1,0 +1,7 @@
+name = "argusml-ingest"
+main = "argusml-worker.js"
+compatibility_date = "2026-04-13"
+
+[[r2_buckets]]
+binding = "ARGUSML_LOGS"
+bucket_name = "argusml-logs"
