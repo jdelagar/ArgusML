@@ -12,9 +12,17 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")
 DATASETS_DIR = os.path.join(BASE_DIR, "datasets")
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 
-# Suricata
-SURICATA_EVE_LOG = "/var/log/suricata/eve.json"
-SURICATA_RULES_FILE = "/var/lib/suricata/rules/argus_ml.rules"
+# Platform support
+import platform as _platform
+_IS_WINDOWS = _platform.system() == "Windows"
+
+# Suricata paths — cross platform
+if _IS_WINDOWS:
+    SURICATA_EVE_LOG = r"C:\Program Files\Suricata\log\eve.json"
+    SURICATA_RULES_FILE = r"C:\Program Files\Suricata\rules\argus_ml.rules"
+else:
+    SURICATA_EVE_LOG = "/var/log/suricata/eve.json"
+    SURICATA_RULES_FILE = "/var/lib/suricata/rules/argus_ml.rules"
 
 # Ollama
 OLLAMA_URL = "http://localhost:11434/api/generate"
