@@ -166,14 +166,16 @@ class BaseStream(ABC):
         dtrain = xgb.DMatrix(X_train_np, label=y_train)
         dtest = xgb.DMatrix(X_test_np, label=y_test)
         # Train using native API for full GPU support
+        n_classes = len(np.unique(y_encoded))
+        is_binary = n_classes == 2
         booster_params = {
             "device": "cuda",
             "tree_method": "hist",
             "max_depth": params.get("max_depth", 6),
             "learning_rate": params.get("learning_rate", 0.1),
-            "objective": "binary:logistic" if len(np.unique(y_encoded)) == 2 else "multi:softprob",
-            "eval_metric": "logloss",
-            "num_class": len(np.unique(y_encoded)) if len(np.unique(y_encoded)) > 2 else None,
+            "objective": "binary:logistic" if is_binary else "multi:softprob",
+            "eval_metric": "logloss" if is_binary else "mlogloss",
+            "num_class": n_classes if not is_binary else None,
         }
         # Remove None values
         booster_params = {k: v for k, v in booster_params.items() if v is not None}

@@ -29,6 +29,7 @@ from core.config import (
     CONFIDENCE_THRESHOLD,
 )
 from streams.suricata import SuricataStream
+from streams.dns import DNSStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
 
@@ -73,6 +74,18 @@ class ArgusML:
 
         # Update fusion weights based on stream accuracy
         self.fusion.weights["suricata"] = max(0.5, suricata.accuracy * 2)
+
+        # DNS stream
+        dns = DNSStream()
+        if self.args.train:
+            self._train_stream(dns)
+        else:
+            if not dns.load_model():
+                print("[argus_ml] No DNS model found — training now...")
+                self._train_stream(dns)
+        self.streams["dns"] = dns
+        self.fusion.weights["dns"] = max(0.5, dns.accuracy * 2)
+        print(f"[argus_ml] DNS stream ready — accuracy: {dns.accuracy:.4f}")
 
     def _train_stream(self, stream):
         """Train a stream on available data."""
@@ -187,15 +200,28 @@ class ArgusML:
         STATS_INTERVAL = 300
 
         try:
-            # Start Suricata stream in live mode
-            suricata = self.streams.get("suricata")
-            if suricata and suricata.is_trained:
-                suricata.run_live(
-                    callback=self._on_detection,
-                    poll_interval=self.args.poll_interval,
-                )
-            else:
+            import threading
+            threads = []
+            for name, stream in self.streams.items():
+                if stream.is_trained:
+                    print(f"[argus_ml] Starting {name} stream...")
+                    t = threading.Thread(
+                        target=stream.run_live,
+                        kwargs={
+                            "callback": self._on_detection,
+                            "poll_interval": self.args.poll_interval,
+                        },
+                        daemon=True
+                    )
+                    t.start()
+                    threads.append(t)
+
+            if not threads:
                 print("[argus_ml] No trained streams available — exiting")
+            else:
+                print(f"[argus_ml] {len(threads)} stream(s) running...")
+                for t in threads:
+                    t.join()
 
         except KeyboardInterrupt:
             print("\n[argus_ml] Shutting down...")
