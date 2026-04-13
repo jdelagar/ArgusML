@@ -211,7 +211,7 @@ ArgusML/
 ## Roadmap
 
 - [x] DNS anomaly detection stream — tunneling, DGA, fast flux detection
-- [ ] TLS/SSL inspection stream
+- [x] TLS/SSL inspection stream — JA3/JA4 fingerprinting, C2 detection
 - [ ] Network flow analysis stream
 - [x] Web dashboard with live threat visualization and world map attack origins
 - [x] REST API for enterprise integration
