@@ -33,6 +33,7 @@ from streams.dns import DNSStream
 from streams.tls import TLSStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
+from core.continuous_learning import ContinuousLearningEngine
 
 
 class ArgusML:
@@ -46,6 +47,7 @@ class ArgusML:
         self.streams = {}
         self.fusion = BayesianFusion()
         self.rule_generator = RuleGenerator()
+        self.continuous_learning = None
         self.running = False
         self.total_detections = 0
         self.start_time = None
@@ -100,6 +102,9 @@ class ArgusML:
         self.fusion.weights["tls"] = max(0.5, tls.accuracy * 2)
         print(f"[argus_ml] TLS stream ready — accuracy: {tls.accuracy:.4f}")
 
+        # Initialize continuous learning
+        self.continuous_learning = ContinuousLearningEngine(self.streams, self.fusion)
+
     def _train_stream(self, stream):
         """Train a stream on available data."""
         csv_path = os.path.join(DATASETS_DIR, f"{stream.get_stream_name()}.csv")
@@ -153,6 +158,10 @@ class ArgusML:
                 if new_rules:
                     self.rule_generator.write_rules()
                     print(f"  ✓ Generated {len(new_rules)} new Suricata rule(s)")
+
+            # Feed to continuous learning
+            if self.continuous_learning:
+                self.continuous_learning.process_decision(decision)
 
             # Log to output file
             self._log_decision(decision)
@@ -214,6 +223,10 @@ class ArgusML:
 
         try:
             import threading
+            # Start continuous learning
+            if self.continuous_learning:
+                self.continuous_learning.start()
+
             threads = []
             for name, stream in self.streams.items():
                 if stream.is_trained:
