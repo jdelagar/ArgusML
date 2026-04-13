@@ -213,7 +213,7 @@ ArgusML/
 - [ ] DNS anomaly detection stream
 - [ ] TLS/SSL inspection stream
 - [ ] Network flow analysis stream
-- [ ] Web dashboard with live threat visualization
+- [x] Web dashboard with live threat visualization and world map attack origins
 - [ ] REST API for enterprise integration
 - [ ] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
