@@ -35,6 +35,7 @@ from streams.netflow import NetFlowStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
 from core.continuous_learning import ContinuousLearningEngine
+from core.attck import get_attck_info, get_tactic_color
 from core.pqc import ArgusMLPQCProvider, ArgusMLThreatIntelShipper
 
 
@@ -124,7 +125,7 @@ class ArgusML:
         try:
             pqc = ArgusMLPQCProvider()
             self.pqc_shipper = ArgusMLThreatIntelShipper(
-                worker_url="https://suricata-ingest.jdelagar.workers.dev/argusml",
+                worker_url="https://argusml-ingest.jdelagar.workers.dev",
                 pqc_provider=pqc
             )
             print("[argus_ml] PQC threat intel shipper initialized")
@@ -177,6 +178,10 @@ class ArgusML:
                 print(f"  Threat:     {fused_label}")
                 print(f"  Confidence: {confidence:.1%}")
                 print(f"  Streams:    {', '.join(decision['streams_consulted'])}")
+                attck = get_attck_info(fused_label)
+                print(f"  ATT&CK:     {attck['technique_id']} — {attck['technique_name']}")
+                print(f"  Tactic:     {attck['tactic']} ({attck['tactic_id']})")
+                print(f"  Severity:   {attck['severity'].upper()}")
                 print(f"  Explanation: {decision['explanation']}")
 
                 # Generate rules
@@ -184,6 +189,10 @@ class ArgusML:
                 if new_rules:
                     self.rule_generator.write_rules()
                     print(f"  ✓ Generated {len(new_rules)} new Suricata rule(s)")
+
+            # Enrich with MITRE ATT&CK
+            attck = get_attck_info(fused_label)
+            decision["attck"] = attck
 
             # Feed to continuous learning
             if self.continuous_learning:
