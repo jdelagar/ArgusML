@@ -9,6 +9,8 @@
 [![GPU](https://img.shields.io/badge/GPU-CUDA%2013.0-brightgreen.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![Accuracy](https://img.shields.io/badge/Accuracy-98.04%25-success.svg)]()
 [![Streams](https://img.shields.io/badge/Streams-4%20Active-orange.svg)]()
+[![ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-Integrated-red.svg)](https://attack.mitre.org/)
+[![PQC](https://img.shields.io/badge/PQC-ML--KEM--768-brightgreen.svg)](https://csrc.nist.gov/pubs/fips/203/final)
 
 ArgusML is a fully autonomous Intrusion Detection & Prevention System (IDPS) powered by an ensemble of independently trained machine learning models. It monitors live network traffic across three detection streams simultaneously, fuses their decisions using adaptive Bayesian weighting, detects known and zero-day threats, autonomously generates and deploys Suricata rules, and continuously retrains itself as new threats are discovered — all without human intervention.
 
@@ -27,6 +29,7 @@ ArgusML is not a single ML model. It is a **self-improving autonomous pipeline**
 - **Continuous Learning Engine** — automatically retrains models as new threats are detected. ArgusML gets smarter the longer it runs.
 - **Local LLM Rule Generator** — uses Meta Llama 3 on local GPU to autonomously write and deploy Suricata detection rules.
 - **PQC Threat Intel Shipper** — encrypts and ships threat intelligence using NIST post-quantum cryptography (ML-KEM-768 + ML-DSA-65 + AES-256-GCM). Quantum-resistant and DoD-ready.
+- **MITRE ATT&CK Integration** — every detection automatically maps to a MITRE ATT&CK technique ID, tactic, and severity level. Speaks the language of enterprise SOCs and DoD.
 
 ---
 
