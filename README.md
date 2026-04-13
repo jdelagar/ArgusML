@@ -210,7 +210,7 @@ ArgusML/
 
 ## Roadmap
 
-- [ ] DNS anomaly detection stream
+- [x] DNS anomaly detection stream — tunneling, DGA, fast flux detection
 - [ ] TLS/SSL inspection stream
 - [ ] Network flow analysis stream
 - [x] Web dashboard with live threat visualization and world map attack origins
