@@ -266,7 +266,7 @@ ArgusML/
 - [x] NetFlow stream — beaconing, port scan, lateral movement, data exfiltration
 - [x] Post-quantum encrypted threat intelligence sharing — ML-KEM-768 + ML-DSA-65 + AES-256-GCM
 - [x] Cloud deployment (AWS EC2 + ECR) — Dashboard: http://18.116.72.77:5002 | API: http://18.116.72.77:5001
-- [ ] Windows support
+- [x] Windows support — cross-platform paths, polling mode, install_windows.bat
 
 ---
 
