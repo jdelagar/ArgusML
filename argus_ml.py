@@ -30,6 +30,7 @@ from core.config import (
 )
 from streams.suricata import SuricataStream
 from streams.dns import DNSStream
+from streams.tls import TLSStream
 from fusion.bayesian import BayesianFusion
 from output.rule_generator import RuleGenerator
 
@@ -86,6 +87,18 @@ class ArgusML:
         self.streams["dns"] = dns
         self.fusion.weights["dns"] = max(0.5, dns.accuracy * 2)
         print(f"[argus_ml] DNS stream ready — accuracy: {dns.accuracy:.4f}")
+
+        # TLS stream
+        tls = TLSStream()
+        if self.args.train:
+            self._train_stream(tls)
+        else:
+            if not tls.load_model():
+                print("[argus_ml] No TLS model found — training now...")
+                self._train_stream(tls)
+        self.streams["tls"] = tls
+        self.fusion.weights["tls"] = max(0.5, tls.accuracy * 2)
+        print(f"[argus_ml] TLS stream ready — accuracy: {tls.accuracy:.4f}")
 
     def _train_stream(self, stream):
         """Train a stream on available data."""
