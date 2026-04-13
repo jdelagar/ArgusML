@@ -26,6 +26,7 @@ ArgusML is not a single ML model. It is a **self-improving autonomous pipeline**
 - **Adaptive Bayesian Fusion Engine** — original architecture that combines all stream outputs with adaptive weighting, getting smarter over time.
 - **Continuous Learning Engine** — automatically retrains models as new threats are detected. ArgusML gets smarter the longer it runs.
 - **Local LLM Rule Generator** — uses Meta Llama 3 on local GPU to autonomously write and deploy Suricata detection rules.
+- **PQC Threat Intel Shipper** — encrypts and ships threat intelligence using NIST post-quantum cryptography (ML-KEM-768 + ML-DSA-65 + AES-256-GCM). Quantum-resistant and DoD-ready.
 
 ---
 
@@ -263,7 +264,7 @@ ArgusML/
 - [x] Docker container for easy deployment
 - [x] Systemd services for autonomous operation
 - [x] NetFlow stream — beaconing, port scan, lateral movement, data exfiltration
-- [ ] Post-quantum encrypted threat intelligence sharing
+- [x] Post-quantum encrypted threat intelligence sharing — ML-KEM-768 + ML-DSA-65 + AES-256-GCM
 - [ ] Cloud deployment (AWS/GCP)
 - [ ] Windows support
 
