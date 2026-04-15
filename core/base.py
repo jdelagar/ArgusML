@@ -69,6 +69,7 @@ class BaseStream(ABC):
             # XGBoost prediction on GPU
             import xgboost as xgb
             X_gpu = xgb.DMatrix(X.to_numpy().astype(np.float32))
+            self.model.set_param({"device": "cuda"})
             raw_preds = self.model.predict(X_gpu)
             if raw_preds.ndim == 1:
                 probs = np.column_stack([1 - raw_preds, raw_preds])
@@ -193,6 +194,7 @@ class BaseStream(ABC):
         # Evaluate using GPU DMatrix
         import xgboost as xgb
         dtest_eval = xgb.DMatrix(X_test.to_numpy().astype(np.float32))
+        self.model.set_param({"device": "cuda"})
         y_pred_raw = self.model.predict(dtest_eval)
         if y_pred_raw.ndim == 1:
             y_pred = (y_pred_raw > 0.5).astype(int)
