@@ -21,7 +21,7 @@ sys.path.insert(0, '/home/cerberus-s6/argusml')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'argusml-dashboard-2026'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Paths
 FUSION_DECISIONS = '/home/cerberus-s6/argusml/output/fusion_decisions.jsonl'
